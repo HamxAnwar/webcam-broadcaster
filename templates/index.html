@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Server</title>
+    <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}.container{max-width:1200px;width:100%}h1{color:white;text-align:center;margin-bottom:30px;font-size:2.5em;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}.video-container{background:white;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3)}img{width:100%;height:auto;display:block}.controls{margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}button{background:white;color:#667eea;border:none;padding:12px 30px;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2)}button:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3)}button:active{transform:translateY(0)}.status{background:white;border-radius:15px;padding:20px;margin-top:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}.status h2{color:#333;margin-bottom:15px;font-size:1.5em}.status-info{color:#666;line-height:1.8}.status-info strong{color:#667eea}</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Camera Server</h1>
+        <div class="video-container">
+            <img src="/video_feed" alt="Camera Feed">
+        </div>
+        <div class="controls">
+            <button onclick="location.reload()">Refresh</button>
+            <button onclick="downloadSnapshot()">Take Snapshot</button>
+        </div>
+        <div class="status">
+            <h2>Status</h2>
+            <div class="status-info" id="status-info">Loading...</div>
+        </div>
+    </div>
+    <script>
+        fetch("/api/status").then(r=>r.json()).then(d=>{
+            const i=document.getElementById("status-info");
+            if(d.camera) i.innerHTML="<strong>Status:</strong> "+d.camera.status+"<br><strong>Resolution:</strong> "+d.camera.width+"x"+d.camera.height+"<br><strong>FPS:</strong> "+d.camera.fps+"<br><strong>Camera Index:</strong> "+d.camera.camera_index;
+            else i.innerHTML="<strong>Error:</strong> "+(d.error||"Unknown");
+        }).catch(e=>document.getElementById("status-info").innerHTML="<strong>Error:</strong> Failed to load status");
+        function downloadSnapshot(){
+            const a=document.createElement("a");
+            a.href="/api/snapshot";
+            a.download="snapshot-"+new Date().getTime()+".jpg";
+            a.click();
+        }
+    </script>
+</body>
+</html>
